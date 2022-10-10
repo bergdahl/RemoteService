@@ -1,5 +1,9 @@
 # RemoteService
-Utility for Windows service start/stop.
+
+Utility for starting/stopping remote Windows services.
+
+Authenticates to the $ADMIN share in order to make sure authentication is done
+prior to trying to access the service. 
 
 Requires .NET 4.8.
 
