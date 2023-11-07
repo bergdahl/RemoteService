@@ -97,7 +97,7 @@ namespace RemoteService
 		public ReturnValue StopService()
 		{
 			ServiceController controller = new ServiceController(this.serviceName, this.host);
-            string processName = GetProcessNameForServiceName();
+            int processId = GetProcessIdForServiceName();
 
             ReturnValue result = ReturnValue.UnknownFailure;
 			try
@@ -119,7 +119,7 @@ namespace RemoteService
 							Console.WriteLine(ex.Message);
 						}
 						WaitForStatus(controller, ServiceControllerStatus.Stopped, timeout);
-                        WaitForProcessExit(processName, DateTime.Now + TimeSpan.FromMinutes(1));                        
+                        WaitForProcessExit(processId, DateTime.Now + TimeSpan.FromMinutes(1));                        
 						break;
 				}
 			}
@@ -151,32 +151,37 @@ namespace RemoteService
 			return result;
 		}
 
-        private void WaitForProcessExit(string processName, DateTime timeout)
+        private void WaitForProcessExit(int processId, DateTime timeout)
         {
             bool running = true;
-            if (processName == "")
+            if (processId == 0)
             {
-                Console.WriteLine("File name is empty, exiting");
+                Console.WriteLine("Process id is 0, exiting");
             }
-            Console.WriteLine("Waiting for process exit for {0}", processName);
+            Console.WriteLine("Waiting for process exit for {0}", processId);
             while (running)
             {
                 if (DateTime.Now > timeout)
                 {
                     throw new System.ServiceProcess.TimeoutException(String.Format("Timout waiting for process exit"));
                 }
-                var processes = Process.GetProcessesByName(processName, this.host);
-                if (processes.Length == 0)
+
+                try
                 {
-                    running = false;
+	                var process = Process.GetProcessById(processId, this.host);
+	                Thread.Sleep(500);
                 }
-                Thread.Sleep(500);
+                catch
+                {
+	                // Process is not available
+	                running = false;
+                }
             }
         }
 
-        private string GetProcessNameForServiceName()
+        private int GetProcessIdForServiceName()
         {
-            string result = "";
+            int result = 0;
 
             try
             {
@@ -198,12 +203,8 @@ namespace RemoteService
                 ManagementObjectCollection collection = searcher.Get();
                 foreach (ManagementObject obj in collection)
                 {
-                    result = obj["PathName"] as string;
-                    string[] strings = SplitArguments(result);
-                    result = strings[0];
+                    result = Convert.ToInt32(obj["ProcessId"]);
                 }
-
-                result = Path.GetFileNameWithoutExtension(result);
             }
             catch
             {

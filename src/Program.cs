@@ -8,8 +8,8 @@ namespace RemoteService
 	{
 		static void Main(string[] args)
 		{
-			Console.WriteLine("RemoteService version 1.1");
-			Console.WriteLine("Copyright 2013-2022, Bergdahl IT AB");
+			Console.WriteLine("RemoteService version 1.2");
+			Console.WriteLine("Copyright 2013-2023, Bergdahl IT AB");
 
 			if (args.Length < 3)
 			{
