@@ -19,4 +19,13 @@ Parameter | Description
 `USERNAME` | Alternate user name, current user will be used if not given
 `PASSWORD` | Password, mandatory if `USERNAME` is used
 
-
+## Troubleshooting
+For non-domain users, if the above didn't work even though you supplied the correct credentials for remote machine.
+please try to run the following powershell commands on the remote machine and try again:
+<pre>Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+Enable-PSRemoting -Force
+winrm quickconfig
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service/auth '@{CbtHardeningLevel="relaxed"}'
+gpupdate /force</pre>
